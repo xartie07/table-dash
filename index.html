@@ -210,7 +210,7 @@ p { margin: 0; }
   padding-bottom: max(14px, env(safe-area-inset-bottom, 0px));
   padding-left: max(16px, env(safe-area-inset-left, 0px));
   padding-right: max(16px, env(safe-area-inset-right, 0px));
-  user-select: none; -webkit-user-select: none; touch-action: manipulation;
+  user-select: none; -webkit-user-select: none; -webkit-touch-callout: none; touch-action: manipulation;
 }
 .g-top { display: flex; align-items: center; gap: 14px; max-width: 1100px; width: 100%; margin: 0 auto; }
 .g-clock { flex: 1; display: flex; align-items: center; gap: 10px; min-width: 0; }
@@ -241,7 +241,7 @@ p { margin: 0; }
 .q .x { color: var(--berry); font-size: .8em; }
 .q.pop { animation: qpop .16s ease-out; }
 @keyframes qpop { from { transform: scale(.88); opacity: .4; } }
-.ans-row { position: relative; display: flex; align-items: center; gap: .3em; font: 800 clamp(48px, 8.5vw, 100px)/1 var(--font-display); }
+.ans-row { position: relative; display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: .3em; font: 800 clamp(48px, 8.5vw, 100px)/1 var(--font-display); }
 .ans-row .eq { color: var(--muted); }
 .ans { min-width: 2.4ch; height: 1.25em; padding: 0 .25em; border-radius: 22px; border: 4px solid var(--sky); background: var(--card); display: grid; place-items: center; font-variant-numeric: tabular-nums; }
 .ans.empty { border-style: dashed; border-color: var(--line); }
@@ -256,7 +256,18 @@ p { margin: 0; }
 .qbar .fill { height: 100%; background: var(--teal); transform-origin: left; }
 .qbar.mid .fill { background: var(--sun); }
 .qbar.low .fill { background: var(--berry); }
-.fix { background: var(--berry-deep); color: #fff; border-radius: 16px; padding: 8px 16px; font: 800 26px/1.2 var(--font-display); }
+.fix { display: grid; justify-items: center; gap: 6px; background: var(--card); border: 3px solid var(--berry); border-radius: 24px; padding: 14px 22px 12px; box-shadow: var(--shadow); max-width: 100%; }
+.fix-fact { font: 800 clamp(48px, 9vw, 104px)/1 var(--font-display); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fix-fact .x { color: var(--berry); font-size: .8em; }
+.fix-fact .r { color: var(--berry-deep); }
+.fix-was { font-weight: 800; color: var(--ink-2); font-size: 19px; }
+.fix-was s { color: var(--bad); }
+.g-tag { background: var(--grape-deep); color: #fff; border-radius: 999px; padding: 5px 14px; font: 800 17px/1.2 var(--font-display); }
+.ans-row .typeit { display: none; font: 800 clamp(22px, 3.4vw, 32px)/1 var(--font-display); color: var(--ink-2); }
+.g-q.fixing .q, .g-q.fixing .ans-row .eq { display: none; }
+.g-q.fixing .ans-row .typeit { display: inline; }
+.g-q.fixing .ans, .g-q.fixing .ans.empty { border-color: var(--berry); }
+.g-q.fixing .ans.empty::after { background: var(--berry); }
 .streak { display: flex; align-items: center; gap: 6px; font: 800 20px/1 var(--font-display); color: var(--tang-deep); min-height: 28px; }
 .streak svg { width: 26px; height: 26px; }
 
@@ -273,6 +284,8 @@ p { margin: 0; }
 .count { font: 800 clamp(110px, 24vw, 220px)/1 var(--font-display); color: var(--tang-deep); }
 .count.pop { animation: cpop .42s ease-out; }
 @keyframes cpop { from { transform: scale(1.6); opacity: 0; } }
+.ov-msg { font: 800 clamp(56px, 11vw, 104px)/1.05 var(--font-display); color: var(--tang-deep); text-align: center; text-wrap: balance; }
+.ov-msg.pop { animation: cpop .42s ease-out; }
 .ov-card { background: var(--card); border: 2px solid var(--line); border-radius: 26px; padding: 26px; box-shadow: var(--shadow); display: grid; gap: 14px; justify-items: center; text-align: center; width: min(92vw, 380px); }
 .ov-card h2 { font-size: 40px; }
 .ov-card .btn-go { font-size: 26px; }
@@ -498,12 +511,13 @@ p { margin: 0; }
     <div class="g-score"><span data-icon="star"></span><span id="g-score">0</span><span class="plus" id="g-plus">+1</span></div>
   </div>
   <div class="g-stage">
-    <div class="g-q">
+    <div class="g-q" id="g-qwrap">
       <span class="buddy-slot" id="g-buddy"></span>
+      <span class="g-tag" id="g-tag" hidden>Again! You missed this one</span>
       <div class="q" id="g-q"><span id="q-a">7</span><span class="x">×</span><span id="q-b">8</span></div>
-      <div class="ans-row"><span class="eq">=</span><div class="ans empty" id="g-ans"></div><span class="ghost" id="g-ghost"></span></div>
+      <div class="fix" id="g-fix" hidden><div class="fix-fact" id="fix-fact"></div><div class="fix-was" id="fix-was"></div></div>
+      <div class="ans-row"><span class="eq">=</span><span class="typeit">Now you type it:</span><div class="ans empty" id="g-ans"></div><span class="ghost" id="g-ghost"></span></div>
       <div class="qbar" id="g-qbar" hidden><div class="fill" id="g-qfill"></div></div>
-      <div class="fix" id="g-fix" hidden></div>
       <div class="streak" id="g-streak"></div>
     </div>
     <div class="pad" id="pad">
@@ -515,6 +529,7 @@ p { margin: 0; }
   </div>
   <div class="overlay" id="g-over" hidden>
     <div class="count" id="ov-count">3</div>
+    <div class="ov-msg" id="ov-msg" hidden></div>
     <div class="ov-card" id="ov-pause" hidden>
       <span class="buddy-slot" data-mood="oops"></span>
       <h2>Paused</h2>
@@ -531,7 +546,7 @@ const $ = (s, r = document) => r.querySelector(s);
 const $$ = (s, r = document) => [...r.querySelectorAll(s)];
 const sleep = (ms) => new Promise((r) => setTimeout(r, ms));
 
-const SPRINT_MS = 100000, LIVES = 3, FIX_MS = 1100, RECENT_N = 5;
+const SPRINT_MS = 100000, LIVES = 3, RECENT_N = 5, RETRY_GAP = 3;
 const COLORS = ['sky', 'tang', 'teal', 'berry', 'grape'];
 
 /* ---------- art ---------- */
@@ -748,6 +763,22 @@ const sfx = {
   streak() { [659, 784, 988].forEach((f, i) => tone(f, 0.1, 'triangle', i * 0.06)); },
   end() { [523, 659, 784, 1047].forEach((f, i) => tone(f, 0.16, 'triangle', i * 0.09)); }
 };
+/* read a missed fact aloud, e.g. "7 times 8 is 56" */
+function say(text) {
+  if (!settings.sound || !('speechSynthesis' in window)) return;
+  try {
+    speechSynthesis.cancel();
+    const u = new SpeechSynthesisUtterance(text);
+    u.lang = navigator.language || 'en-US';
+    u.rate = 0.9;
+    speechSynthesis.speak(u);
+  } catch (e) { /* no speech on this device */ }
+}
+/* iPad Safari only speaks after a tap has started speech once */
+function unlockSpeech() {
+  if (!settings.sound || !('speechSynthesis' in window)) return;
+  try { const u = new SpeechSynthesisUtterance(' '); u.volume = 0; speechSynthesis.speak(u); } catch (e) { /* ignore */ }
+}
 function syncSound() {
   const b = $('#snd');
   b.innerHTML = settings.sound ? ICONS.soundOn : ICONS.soundOff;
@@ -858,11 +889,13 @@ $('#start').addEventListener('click', startGame);
 let G = null;
 const newId = () => 'g' + Date.now().toString(36) + Math.random().toString(36).slice(2, 7);
 function shuffle(a) { for (let i = a.length - 1; i > 0; i--) { const j = Math.floor(Math.random() * (i + 1)); [a[i], a[j]] = [a[j], a[i]]; } return a; }
-function activeNow() { const g = G; if (!g) return 0; return g.active + (g.started && !g.paused ? performance.now() - g.lastNow : 0); }
+/* the game clock runs only while a question is live: not during the countdown, a pause, or while she copies a correction */
+const running = (g) => g.started && !g.paused && !g.fixing && !g.over;
+function activeNow() { const g = G; if (!g) return 0; return g.active + (running(g) ? performance.now() - g.lastNow : 0); }
 
 function startGame() {
   if (!settings.tables.length) return;
-  audio();
+  audio(); unlockSpeech();
   const facts = selectedFacts();
   const hist = factStats(), stats = new Map();
   for (const f of facts) { const s = hist.get(f.k); if (s) stats.set(f.k, { ...s, recent: s.recent.slice() }); }
@@ -872,8 +905,10 @@ function startGame() {
     facts, stats, bag: [], lastKeys: [], attempts: [],
     score: 0, wrong: 0, timeouts: 0, lives: LIVES, streak: 0, bestStreak: 0,
     active: 0, lastNow: performance.now(), started: false, paused: false, over: false,
-    q: null, qStart: 0, typed: '', lockUntil: 0, pendingEnd: false, raf: 0, shownSec: -1, qClass: ''
+    q: null, qStart: 0, qCount: 0, typed: '', fixing: false, fixDone: false, retries: [], pendingEnd: false, raf: 0, shownSec: -1, qClass: ''
   };
+  $('#g-qwrap').classList.remove('fixing');
+  $('#g-tag').hidden = true;
   const sprint = G.game === 'sprint';
   $('#g-clock').hidden = !sprint;
   $('#hearts').hidden = sprint;
@@ -893,7 +928,7 @@ function startGame() {
 
 function countdown() {
   const g = G, ov = $('#g-over'), cd = $('#ov-count');
-  ov.hidden = false; $('#ov-pause').hidden = true; cd.hidden = false;
+  ov.hidden = false; $('#ov-pause').hidden = true; $('#ov-msg').hidden = true; cd.hidden = false;
   const steps = ['3', '2', '1', 'Go!']; let i = 0;
   const step = () => {
     if (G !== g || g.over) return;
@@ -915,17 +950,13 @@ function countdown() {
 function loop(now) {
   const g = G;
   if (!g || g.over) return;
-  if (g.started && !g.paused) g.active += Math.min(now - g.lastNow, 500);
+  const live = running(g);
+  if (live) g.active += Math.min(now - g.lastNow, 500);
   g.lastNow = now;
-  if (g.started && !g.paused) {
-    if (g.lockUntil && g.active >= g.lockUntil) {
-      g.lockUntil = 0;
-      if (g.pendingEnd) { endGame(false); return; }
-      nextQuestion();
-    }
+  if (live) {
     if (g.game === 'sprint' && g.active >= SPRINT_MS) { endGame(false); return; }
-    if (g.game === 'speed' && !g.lockUntil && g.q && g.active - g.qStart >= g.perQ * 1000) timeout();
-    drawClock();
+    if (g.game === 'speed' && g.q && g.active - g.qStart >= g.perQ * 1000) { timeout(); }
+    else drawClock();
   }
   g.raf = requestAnimationFrame(loop);
 }
@@ -937,7 +968,7 @@ function drawClock() {
     $('#g-fill').style.transform = `scaleX(${left / SPRINT_MS})`;
     const sec = Math.ceil(left / 1000);
     if (sec !== g.shownSec) { g.shownSec = sec; $('#g-time').textContent = sec; $('#g-clock').classList.toggle('low', sec <= 10); }
-  } else if (!g.lockUntil && g.q) {
+  } else if (g.q) {
     const frac = Math.max(0, 1 - (g.active - g.qStart) / (g.perQ * 1000));
     $('#g-qfill').style.transform = `scaleX(${frac})`;
     const cls = frac < 0.25 ? 'low' : frac < 0.5 ? 'mid' : '';
@@ -984,15 +1015,22 @@ function pickFact() {
 
 function nextQuestion() {
   const g = G;
-  const f = pickFact();
-  g.q = f;
+  g.qCount++;
+  // a fact she missed comes back a couple of questions later
+  const prev = g.lastKeys[g.lastKeys.length - 1];
+  const ri = g.retries.findIndex((r) => r.due <= g.qCount && r.f.k !== prev);
+  const again = ri >= 0;
+  const f = again ? g.retries.splice(ri, 1)[0].f : pickFact();
+  g.q = { t: f.t, m: f.m, k: f.k, again };
   g.lastKeys.push(f.k); if (g.lastKeys.length > 4) g.lastKeys.shift();
   g.typed = '';
   g.qStart = activeNow();
   g.qClass = '';
   $('#q-a').textContent = f.t; $('#q-b').textContent = f.m;
+  $('#g-qwrap').classList.remove('fixing');
   $('#g-fix').hidden = true;
-  const qb = $('#g-qbar'); qb.classList.remove('low', 'mid'); $('#g-qfill').style.transform = 'scaleX(1)';
+  $('#g-tag').hidden = !again;
+  const qb = $('#g-qbar'); qb.hidden = g.game !== 'speed'; qb.classList.remove('low', 'mid'); $('#g-qfill').style.transform = 'scaleX(1)';
   drawAnswer();
   restart($('#g-q'), 'pop');
 }
@@ -1005,21 +1043,40 @@ function record(a) {
 
 function press(k) {
   const g = G;
-  if (!g || !g.started || g.paused || g.over || g.lockUntil || !g.q) return;
+  if (!g || !g.started || g.paused || g.over || g.fixDone || !g.q) return;
   if (k === 'back') { g.typed = g.typed.slice(0, -1); drawAnswer(); return; }
   if (k === 'clear') { g.typed = ''; drawAnswer(); return; }
   if (k === '0' && !g.typed) return;
   if (g.typed.length >= 3) return;
   g.typed += k;
   drawAnswer();
-  if (g.typed.length >= String(g.q.t * g.q.m).length) submit();
+  if (g.typed.length >= String(g.q.t * g.q.m).length) { if (g.fixing) checkCopy(); else submit(); }
+}
+
+/* after a miss she copies the right answer before moving on */
+function checkCopy() {
+  const g = G, ans = g.q.t * g.q.m;
+  if (parseInt(g.typed, 10) === ans) {
+    g.fixDone = true;
+    sfx.good(); mood('joy', 'hop');
+    const gh = $('#g-ghost'); gh.textContent = 'Got it! ✓'; restart(gh, 'go');
+    setTimeout(() => {
+      if (G !== g || g.over) return;
+      g.fixing = false; g.fixDone = false; g.lastNow = performance.now();
+      if (g.pendingEnd) endGame(false); else nextQuestion();
+    }, 550);
+  } else {
+    sfx.bad();
+    g.typed = '';
+    restart($('#g-ans'), 'bad');
+  }
 }
 
 function submit() {
   const g = G;
   const ms = Math.round(activeNow() - g.qStart);
   const given = parseInt(g.typed, 10), ans = g.q.t * g.q.m, ok = given === ans;
-  record({ table: g.q.t, times: g.q.m, answer: given, correct: ok, ms, timedOut: false });
+  record({ table: g.q.t, times: g.q.m, answer: given, correct: ok, ms, timedOut: false, again: g.q.again });
   if (ok) {
     g.score++; g.streak++; g.bestStreak = Math.max(g.bestStreak, g.streak);
     const gh = $('#g-ghost'); gh.textContent = ans + ' ✓'; restart(gh, 'go');
@@ -1029,33 +1086,39 @@ function submit() {
     nextQuestion();
   } else {
     g.wrong++;
-    miss(ans, false);
+    miss(ans, given);
   }
 }
 function timeout() {
   const g = G;
-  record({ table: g.q.t, times: g.q.m, answer: null, correct: false, ms: g.perQ * 1000, timedOut: true });
+  record({ table: g.q.t, times: g.q.m, answer: null, correct: false, ms: g.perQ * 1000, timedOut: true, again: g.q.again });
   g.timeouts++;
-  miss(g.q.t * g.q.m, true);
+  miss(g.q.t * g.q.m, null);
 }
-function miss(ans, timedOut) {
+/* given = what she typed, or null when the clock ran out */
+function miss(ans, given) {
   const g = G;
   g.streak = 0;
   if (g.game === 'speed') {
     g.lives--;
     if (g.lives <= 0) g.pendingEnd = true;
   }
+  // bring this fact back a couple of questions from now
+  const r = g.retries.find((x) => x.f.k === g.q.k);
+  if (r) r.due = g.qCount + RETRY_GAP; else g.retries.push({ f: g.q, due: g.qCount + RETRY_GAP });
+  // stop the clock and show the right answer until she has typed it herself
+  g.fixing = true; g.fixDone = false; g.typed = '';
   sfx.bad(); mood('oops', 'shake');
-  const a = $('#g-ans');
-  if (timedOut) { a.textContent = '?'; a.classList.remove('empty'); }
-  restart(a, 'bad');
-  const fix = $('#g-fix');
-  fix.textContent = (timedOut ? "Time's up! " : '') + `${g.q.t} × ${g.q.m} = ${ans}`;
-  fix.hidden = false;
+  $('#fix-fact').innerHTML = `${g.q.t} <span class="x">×</span> ${g.q.m} = <span class="r">${ans}</span>`;
+  $('#fix-was').innerHTML = given == null ? 'Out of time' : `You typed <s>${given}</s>`;
+  $('#g-fix').hidden = false;
+  $('#g-tag').hidden = true;
+  $('#g-qbar').hidden = true;
+  $('#g-qwrap').classList.add('fixing');
+  drawAnswer();
   drawHUD();
-  if (g.game === 'speed') { const hs = $$('#hearts .heart'); const lost = hs[g.lives]; if (lost) lost.classList.add('lost'); }
-  g.lockUntil = g.active + FIX_MS;
-  setTimeout(() => { if (G === g && !g.over) mood(null); }, FIX_MS);
+  if (g.game === 'speed') { const lost = $$('#hearts .heart')[g.lives]; if (lost) lost.classList.add('lost'); }
+  say(`${g.q.t} times ${g.q.m} is ${ans}`);
 }
 
 function pauseGame() {
@@ -1077,8 +1140,6 @@ function endGame(quit) {
   g.over = true;
   cancelAnimationFrame(g.raf);
   releaseWake();
-  $('#v-game').hidden = true; $('#g-over').hidden = true;
-  document.body.classList.remove('in-game');
   const doc = {
     v: 1, id: g.id, player: 'Sia',
     startedAt: g.startedAt, endedAt: new Date().toISOString(),
@@ -1089,11 +1150,21 @@ function endGame(quit) {
     quit: !!quit, playedSec: Math.round(Math.min(g.active, g.game === 'sprint' ? SPRINT_MS : Infinity) / 100) / 10,
     attempts: g.attempts
   };
-  G = null;
-  if (!doc.attempts.length) { show('play'); return; }
+  if (!doc.attempts.length) { G = null; closeGame(); show('play'); return; }
   const prevBest = bestFor(doc, doc.id);
-  showResults(doc, prevBest);
   saveGame(doc);
+  const finish = () => { if (G !== g) return; G = null; closeGame(); showResults(doc, prevBest); };
+  if (quit) { finish(); return; }
+  // a short "Time's up!" moment instead of jumping straight to the results
+  const msg = $('#ov-msg');
+  $('#g-over').hidden = false; $('#ov-count').hidden = true; $('#ov-pause').hidden = true;
+  msg.textContent = g.game === 'sprint' ? "Time's up!" : 'Out of hearts!';
+  msg.hidden = false; restart(msg, 'pop');
+  setTimeout(finish, 1400);
+}
+function closeGame() {
+  $('#v-game').hidden = true; $('#g-over').hidden = true; $('#ov-msg').hidden = true;
+  document.body.classList.remove('in-game');
 }
 
 /* game input */
@@ -1121,7 +1192,7 @@ function showResults(doc, prevBest) {
   sfx.end();
   const isBest = !doc.quit && doc.score > 0 && (prevBest == null || doc.score > prevBest);
   $('#r-kicker').textContent = doc.game === 'sprint' ? '100-Second Sprint · ' + (doc.mode === 'adaptive' ? 'Adaptive' : 'General') : 'Speed Test · ' + doc.perQSec + ' s per question · ' + (doc.mode === 'adaptive' ? 'Adaptive' : 'General');
-  $('#r-title').textContent = doc.score + ' right!';
+  $('#r-title').textContent = doc.score ? doc.score + ' right!' : 'Nice try!';
   $('#r-sub').textContent = (doc.quit ? 'Game ended early. ' : '') + 'Tables ' + fmtTables(doc.tables) + ', up to × ' + doc.upTo;
   const badge = $('#r-best');
   badge.classList.toggle('plain', !isBest);
