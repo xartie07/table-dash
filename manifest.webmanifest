@@ -1,0 +1,13 @@
+{
+  "name": "Sia's Table Dash",
+  "short_name": "Table Dash",
+  "start_url": "./",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#e8f2ff",
+  "theme_color": "#e8f2ff",
+  "icons": [
+    { "src": "icon-180.png", "sizes": "180x180", "type": "image/png" },
+    { "src": "icon-512.png", "sizes": "512x512", "type": "image/png" }
+  ]
+}
