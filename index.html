@@ -352,11 +352,11 @@ p { margin: 0; }
 .duel-grid { height: 100%; display: grid; grid-template-rows: 1fr 1fr; gap: 14px; }
 .duel.side .duel-grid { grid-template-rows: none; grid-template-columns: 1fr 1fr; }
 .pl {
-  --c: var(--sky); --cd: var(--sky-deep);
+  --c: var(--sky); --cd: var(--sky-deep); --o: var(--tang);
   position: relative; min-height: 0; min-width: 0; display: grid; grid-template-rows: auto 1fr; gap: 8px;
   background: var(--card); border: 3px solid var(--c); border-radius: 24px; padding: 10px 14px; overflow: hidden;
 }
-.pl.p2 { --c: var(--tang); --cd: var(--tang-deep); }
+.pl.p2 { --c: var(--tang); --cd: var(--tang-deep); --o: var(--sky); }
 .duel:not(.side) .p2 { transform: rotate(180deg); order: 0; }
 .duel:not(.side) .p1 { order: 1; }
 .duel.side .p1 { order: 0; }
@@ -365,7 +365,34 @@ p { margin: 0; }
 @keyframes hit { 50% { box-shadow: 0 0 0 7px color-mix(in srgb, var(--good) 45%, transparent); } }
 .pl-top { display: flex; align-items: center; gap: 10px; }
 .pl-name { font: 800 22px/1 var(--font-display); max-width: 40%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.pl-top .track .fill { background: var(--c); }
+/* race: your runner and a ghost of the other player heading for the finish flag */
+.lane, .rope { position: relative; flex: 1; min-width: 0; height: 36px; border-radius: 999px; background: var(--card-2); border: 2px solid var(--line); }
+.lane::before { content: ""; position: absolute; left: 16px; right: 30px; top: 50%; border-top: 2px dashed var(--line); }
+.finish { position: absolute; right: 6px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; color: var(--ink); }
+.finish svg { width: 100%; height: 100%; display: block; }
+.tok { position: absolute; top: 50%; left: 3px; width: 30px; height: 30px; margin-top: -15px; border-radius: 50%; display: grid; place-items: center; font: 800 16px/1 var(--font-display); color: #fff; transition: left .4s cubic-bezier(.3, 1.4, .5, 1); }
+.tok.me { background: var(--c); z-index: 2; box-shadow: 0 2px 0 rgba(0,0,0,.22); }
+.tok.opp { background: var(--o); opacity: .5; transform: scale(.8); }
+/* tug of war: the knot moves toward whoever is pulling harder; your zone is on your left */
+.rope { overflow: hidden; }
+.rope .zone { position: absolute; top: 0; bottom: 0; width: 14%; }
+.rope .zone.me { left: 0; background: color-mix(in srgb, var(--c) 35%, transparent); }
+.rope .zone.opp { right: 0; background: color-mix(in srgb, var(--o) 35%, transparent); }
+.rope .line { position: absolute; left: 0; right: 0; top: 50%; height: 7px; margin-top: -3.5px; background: repeating-linear-gradient(60deg, #b07a12 0 5px, #e2a93a 5px 10px); }
+.rope .mid { position: absolute; left: 50%; top: 3px; bottom: 3px; width: 2px; margin-left: -1px; background: var(--muted); opacity: .6; }
+.rope .knot { position: absolute; top: 50%; left: 50%; width: 22px; height: 22px; margin: -11px 0 0 -11px; border-radius: 6px; background: var(--berry-deep); border: 3px solid var(--card); transform: rotate(45deg); transition: left .4s cubic-bezier(.3, 1.4, .5, 1); }
+.pl-q { position: relative; }
+.pl-pop { position: absolute; top: -4px; left: 50%; font: 800 36px/1 var(--font-display); color: var(--good); opacity: 0; pointer-events: none; transform: translateX(-50%); z-index: 1; white-space: nowrap; }
+.pl-pop.bad { color: var(--bad); }
+.pl-pop.go { animation: pullpop .75s ease-out; }
+@keyframes pullpop { 0% { opacity: 1; transform: translate(-50%, 12px) scale(.9); } 100% { opacity: 0; transform: translate(-50%, -44px) scale(1.25); } }
+/* a mistake freezes your keypad */
+.pl .pad { position: relative; }
+.freeze { position: absolute; inset: -6px; z-index: 2; border-radius: 18px; display: grid; place-content: center; justify-items: center; gap: 6px; background: rgba(170, 215, 255, .78); color: #0b3a66; font: 800 26px/1 var(--font-display); border: 2px solid rgba(255,255,255,.8); }
+.freeze svg { width: 46px; height: 46px; }
+.freeze .fbar { width: 120px; height: 8px; border-radius: 4px; background: rgba(255,255,255,.75); overflow: hidden; }
+.freeze .fbar i { display: block; height: 100%; background: #2a78d6; transform-origin: left; animation: drain 2s linear forwards; }
+@keyframes drain { to { transform: scaleX(0); } }
 .pl-score { font: 800 24px/1 var(--font-display); font-variant-numeric: tabular-nums; white-space: nowrap; }
 .pl-body { min-height: 0; display: grid; grid-template-columns: 1fr minmax(190px, 290px); gap: 14px; align-items: center; }
 .duel.side .pl-body { grid-template-columns: 1fr; grid-template-rows: 1fr auto; justify-items: center; }
@@ -634,7 +661,7 @@ p { margin: 0; }
         <span class="buddy-slot" data-mood="joy"></span>
         <div class="bubble">
           <h1>Face-off!</h1>
-          <p>Two players, one iPad. First to the target wins. Give the grown-up harder tables so it's a fair race.</p>
+          <p>Two players, one iPad. Give the grown-up harder tables so it's a fair fight.</p>
         </div>
       </div>
       <p class="record" id="fo-record"></p>
@@ -652,6 +679,14 @@ p { margin: 0; }
       </div>
       <div class="panel">
         <div class="row">
+          <span class="lbl">Game</span>
+          <div class="seg" id="seg-fomode">
+            <button type="button" data-v="race">Race to the finish</button>
+            <button type="button" data-v="tug">Tug of war</button>
+          </div>
+        </div>
+        <p class="note" id="fo-rules"></p>
+        <div class="row" id="row-race">
           <span class="lbl">First to</span>
           <div class="seg" id="seg-race">
             <button type="button" data-v="10">10</button>
@@ -668,6 +703,7 @@ p { margin: 0; }
         </div>
         <p class="note" id="seat-note"></p>
       </div>
+      <p class="badge" id="fo-hs" hidden style="justify-self:center"></p>
       <button type="button" class="btn-go" id="fo-go">Start face-off</button>
       <p class="start-msg" id="fo-msg"></p>
     </section>
@@ -685,7 +721,7 @@ p { margin: 0; }
           <div class="chart" id="chart-speed"></div>
         </div>
         <div class="panel">
-          <div><h2>Facts mastered</h2><p class="note">A star needs a right, fast answer on 3 separate days, spaced out.</p></div>
+          <div><h2>Facts mastered</h2><p class="note">A star: right and fast on 3 separate days, spaced out, or 10 fast right answers in one day.</p></div>
           <div class="chart" id="chart-stars"></div>
         </div>
       </div>
@@ -783,6 +819,8 @@ const esc = (s) => String(s).replace(/[&<>"']/g, (c) => ({ '&': '&amp;', '<': '&
 const SPRINT_MS = 100000, LIVES = 3, RECENT_N = 5, RETRY_GAP = 3;
 const PRACTICE_SIZE = 20, PRACTICE_MIN = 12, NEW_PER_DAY = 5;
 const INTERVAL = [0, 1, 3, 14];      // days until a fact's next check, by level (3 = mastered)
+const SAME_DAY_STAR = 10;            // or: this many fast right answers on one day
+const TUG_WIN = 15, TUG_MS = 120000, FREEZE_MS = 2000, HEAD_RACE = 2, HEAD_TUG = 3;
 const COLORS = ['sky', 'tang', 'teal', 'berry', 'grape'];
 const KINDS = ['mul', 'miss', 'div'];
 
@@ -827,7 +865,7 @@ const LS = {
 };
 const DEF = {
   tables: [2, 3, 4, 5], upTo: 10, game: 'sprint', mode: 'general', perQ: 6, sound: true, kinds: ['mul'],
-  dailyTables: range(2, 10), p1Tables: range(2, 10), p2Tables: range(12, 19), p2name: '', raceTo: 15, seating: 'facing'
+  dailyTables: range(2, 10), p1Tables: range(2, 10), p2Tables: range(12, 19), p2name: '', raceTo: 15, seating: 'facing', foMode: 'race'
 };
 const settings = Object.assign({}, DEF, LS.get('ttd.settings', {}));
 const cleanTables = (v, d) => [...new Set((Array.isArray(v) ? v : d).map(Number).filter((n) => n >= 2 && n <= 20))];
@@ -840,6 +878,7 @@ if (!['general', 'adaptive'].includes(settings.mode)) settings.mode = 'general';
 if (![4, 6, 8].includes(settings.perQ)) settings.perQ = 6;
 if (![10, 15, 20].includes(settings.raceTo)) settings.raceTo = 15;
 if (!['facing', 'side'].includes(settings.seating)) settings.seating = 'facing';
+if (!['race', 'tug'].includes(settings.foMode)) settings.foMode = 'race';
 settings.p2name = String(settings.p2name || '').slice(0, 16);
 const saveSettings = () => LS.set('ttd.settings', settings);
 const p2Name = () => settings.p2name.trim() || 'Player 2';
@@ -983,12 +1022,22 @@ function addAttempt(map, a, D, tally) {
   if (s.recent.length > RECENT_N) s.recent.shift();
   const before = s.level;
   const first = s.lastDay !== D;
+  if (first) s.dayFast = 0;
   s.lastDay = D;
-  if (!a.correct) { s.level = s.level >= 3 ? 1 : 0; s.due = D + 1; }
-  else if (first) {
-    if (a.ms <= fastMs(kind, a.table)) {
-      if (s.due == null || D >= s.due) { s.level = Math.min(3, s.level + 1); s.due = D + INTERVAL[s.level]; }
-    } else { if (s.level === 3) s.level = 2; s.due = D + 1; }
+  const fast = a.correct && a.ms <= fastMs(kind, a.table);
+  if (!a.correct) { s.level = s.level >= 3 ? 1 : 0; s.due = D + 1; s.dayFast = 0; }
+  else {
+    if (first) {
+      if (fast) {
+        if (s.due == null || D >= s.due) { s.level = Math.min(3, s.level + 1); s.due = D + INTERVAL[s.level]; }
+      } else { if (s.level === 3) s.level = 2; s.due = D + 1; }
+    }
+    // second route to a star: 10 fast right answers on one day (a miss that day restarts the count).
+    // A star earned this way is re-checked after 3 days instead of 2 weeks, since cramming can fade.
+    if (fast) {
+      s.dayFast = (s.dayFast || 0) + 1;
+      if (s.dayFast >= SAME_DAY_STAR && s.level < 3) { s.level = 3; s.due = D + 3; }
+    }
   }
   if (tally) { if (before < 3 && s.level === 3) tally.m++; else if (before === 3 && s.level < 3) tally.m--; }
 }
@@ -1696,20 +1745,37 @@ $('#again').addEventListener('click', () => startGame(lastWasPractice));
 $('#change').addEventListener('click', () => { if (location.hash && location.hash !== '#play') location.hash = 'play'; show('play'); });
 
 /* ---------- face-off setup ---------- */
+function faceoffs(name) { return allGames().filter((g) => g.game === 'faceoff' && !g.quit && !g.draw && (g.opponent || '') === name); }
 function headToHead(name) {
   let w = 0, l = 0;
-  for (const g of allGames()) if (g.game === 'faceoff' && !g.quit && (g.opponent || '') === name) { if (g.won) w++; else l++; }
+  for (const g of faceoffs(name)) { if (g.won) w++; else l++; }
   return [w, l];
+}
+// whoever lost the last two face-offs against this opponent starts ahead: 0 = Sia, 1 = player 2, null = nobody
+function headStartFor(name) {
+  const last = faceoffs(name).slice(-2);
+  if (last.length < 2) return null;
+  if (last.every((g) => g.won)) return 1;
+  if (last.every((g) => !g.won)) return 0;
+  return null;
 }
 function syncFaceoff() {
   syncChips($('#p1chips'), 'p1Tables');
   syncChips($('#p2chips'), 'p2Tables');
+  segSync('#seg-fomode', (b) => b.dataset.v === settings.foMode);
   segSync('#seg-race', (b) => +b.dataset.v === settings.raceTo);
   segSync('#seg-seat', (b) => b.dataset.v === settings.seating);
+  $('#row-race').hidden = settings.foMode !== 'race';
+  $('#fo-rules').textContent = settings.foMode === 'race'
+    ? 'Each right answer moves your runner one step. First to the finish wins. A mistake freezes your keypad for 2 seconds, then you type the right answer.'
+    : 'Fast answers pull harder: under 2 seconds pulls 3, under 4 seconds pulls 2, slower pulls 1 (missing-number and ÷ questions get an extra second). A mistake slips the rope back 2 and freezes your keypad for 2 seconds. Pull the knot into your zone to win, or be ahead when the 2 minutes are up.';
   const inp = $('#p2name');
   if (document.activeElement !== inp) inp.value = settings.p2name;
-  const name = p2Name(), [w, l] = headToHead(name);
+  const name = p2Name(), [w, l] = headToHead(name), hs = headStartFor(name);
   $('#fo-record').innerHTML = w + l ? `Sia <b>${w}</b><span class="vs">vs</span><b>${l}</b> ${esc(name)}` : `First face-off against ${esc(name)}!`;
+  const hsEl = $('#fo-hs');
+  hsEl.hidden = hs == null;
+  hsEl.textContent = hs === 0 ? `Head start for Sia this time (${name} won the last 2)` : hs === 1 ? `Head start for ${name} this time (Sia won the last 2)` : '';
   $('#seat-note').textContent = settings.seating === 'facing'
     ? 'Lay the iPad flat between you. Player 2 gets the top half, upside down.'
     : 'Hold the iPad sideways. Sia gets the left half.';
@@ -1718,70 +1784,112 @@ function syncFaceoff() {
   $('#fo-msg').textContent = bad ? 'Both players need at least one table.' : '';
 }
 $('#p2name').addEventListener('input', (e) => { settings.p2name = e.target.value.slice(0, 16); saveSettings(); syncFaceoff(); });
+segHandler('#seg-fomode', 'foMode', false);
 segHandler('#seg-race', 'raceTo', true);
 segHandler('#seg-seat', 'seating', false);
 $('#fo-go').addEventListener('click', startDuel);
 
 /* ---------- face-off game ---------- */
 let D = null;
+const FLAG = '<svg viewBox="0 0 20 20" aria-hidden="true"><path d="M4 2v17" stroke="currentColor" stroke-width="2"/><path d="M5 3h12v9H5z" fill="#fff" stroke="currentColor"/><path d="M5 3h3v3H5zM11 3h3v3h-3zM8 6h3v3H8zM14 6h3v3h-3zM5 9h3v3H5zM11 9h3v3h-3z" fill="currentColor"/></svg>';
+const SNOW = '<svg viewBox="0 0 48 48" aria-hidden="true"><g stroke="currentColor" stroke-width="4" stroke-linecap="round" fill="none"><path d="M24 4v40M6.7 14l34.6 20M6.7 34l34.6-20"/><path d="M18 8l6 6 6-6M18 40l6-6 6 6M5 20l8 1-3 7M43 28l-8-1 3-7M5 28l8-1-3-7M43 20l-8 1 3 7"/></g></svg>';
 function buildPanel(el) {
-  el.innerHTML = `<div class="pl-top"><span class="pl-name"></span><div class="track"><div class="fill"></div></div><span class="pl-score">0</span></div>
+  el.innerHTML = `<div class="pl-top"><span class="pl-name"></span>
+      <div class="lane"><span class="finish">${FLAG}</span><span class="tok opp"></span><span class="tok me"></span></div>
+      <div class="rope" hidden><span class="zone me"></span><span class="zone opp"></span><span class="line"></span><span class="mid"></span><span class="knot"></span></div>
+      <span class="pl-score">0</span></div>
     <div class="pl-body">
-      <div class="pl-q"><span class="g-tag" hidden></span><div class="q"></div>
+      <div class="pl-q"><span class="pl-pop"></span><span class="g-tag" hidden></span><div class="q"></div>
         <div class="fix" hidden><div class="fix-fact"></div></div>
         <div class="ans-row"><span class="eq">=</span><span class="typeit">Type it:</span><div class="ans empty"></div></div></div>
-      <div class="pad">${PAD_KEYS}</div>
+      <div class="pad">${PAD_KEYS}<div class="freeze" hidden>${SNOW}<span>Frozen!</span><span class="fbar"><i></i></span></div></div>
     </div>
     <div class="pl-over" hidden><div class="pl-msg"></div><div class="pl-sub"></div></div>`;
 }
 const duelNow = () => (D.paused ? D.pauseAt : performance.now()) - D.t0 - D.pausedMs;
+const mmss = (ms) => { const s = Math.ceil(ms / 1000); return Math.floor(s / 60) + ':' + String(s % 60).padStart(2, '0'); };
+// tug of war: how hard a right answer pulls, by speed
+function pullFor(f, ms) { const t = ms - (f.kind === 'mul' ? 0 : 1000); return t < 2000 ? 3 : t < 4000 ? 2 : 1; }
+
 function startDuel() {
   if (!settings.p1Tables.length || !settings.p2Tables.length) return;
   audio();
   const mk = (i, name, tables) => ({
     i, name, el: $('#pl' + (i + 1)), tables: tables.slice().sort((a, b) => a - b),
     facts: factsFor(tables, settings.upTo, settings.kinds), mode: 'general', stats: new Map(),
-    bag: [], lastKeys: [], retries: [], qCount: 0, q: null, qStart: 0, typed: '', fixing: false, score: 0, wrong: 0, attempts: []
+    bag: [], lastKeys: [], retries: [], qCount: 0, q: null, qStart: 0, typed: '', fixing: false, frozenUntil: 0,
+    score: 0, bonus: 0, wrong: 0, attempts: []
   });
+  const hs = headStartFor(p2Name());
   D = {
-    id: newId(), startedAt: new Date().toISOString(), target: settings.raceTo, kinds: settings.kinds.slice(), upTo: settings.upTo,
-    started: false, paused: false, over: false, t0: 0, pausedMs: 0, pauseAt: 0,
+    id: newId(), startedAt: new Date().toISOString(), mode: settings.foMode, target: settings.raceTo, kinds: settings.kinds.slice(), upTo: settings.upTo,
+    started: false, paused: false, over: false, t0: 0, pausedMs: 0, pauseAt: 0, rope: 0, tick: 0, headStart: hs,
     p: [mk(0, 'Sia', settings.p1Tables), mk(1, p2Name(), settings.p2Tables)]
   };
+  if (hs != null) { if (D.mode === 'race') D.p[hs].bonus = HEAD_RACE; else D.rope = hs === 0 ? HEAD_TUG : -HEAD_TUG; }
   const v = $('#v-duel');
   v.classList.toggle('side', settings.seating === 'side');
   for (const p of D.p) {
+    const o = D.p[1 - p.i];
     $('.pl-name', p.el).textContent = p.name;
+    $('.lane', p.el).hidden = D.mode !== 'race';
+    $('.rope', p.el).hidden = D.mode !== 'tug';
+    $('.tok.me', p.el).textContent = p.name.charAt(0).toUpperCase();
+    $('.tok.opp', p.el).textContent = o.name.charAt(0).toUpperCase();
     $('.q', p.el).innerHTML = '';
     $('.pl-q', p.el).classList.remove('fixing');
     $('.fix', p.el).hidden = true;
     $('.g-tag', p.el).hidden = true;
-    drawDuelAns(p); drawDuelHUD(p);
+    $('.freeze', p.el).hidden = true;
+    drawDuelAns(p);
   }
+  drawDuel();
   $('#duel-end').hidden = true; $('#duel-over').hidden = true; $('#duel-pause').hidden = false;
   v.hidden = false;
   document.body.classList.add('in-game');
   keepAwake();
   const d = D, steps = ['3', '2', '1', 'Go!']; let i = 0;
-  d.p.forEach((p) => { $('.pl-over', p.el).hidden = false; $('.pl-sub', p.el).textContent = ''; });
+  d.p.forEach((p) => {
+    $('.pl-over', p.el).hidden = false;
+    $('.pl-sub', p.el).textContent = hs === p.i ? (d.mode === 'race' ? `Head start: you begin ${HEAD_RACE} steps ahead!` : 'Head start: the rope begins on your side!') : '';
+  });
   const step = () => {
     if (D !== d || d.over) return;
     if (i < steps.length) {
       d.p.forEach((p) => { const m = $('.pl-msg', p.el); m.textContent = steps[i]; restart(m, 'pop'); });
       if (i < 3) sfx.tick(); else sfx.go();
       i++;
-      setTimeout(step, i === 4 ? 320 : 430);
+      setTimeout(step, i === 4 ? 320 : (hs != null && i === 1 ? 900 : 430));
     } else {
       d.p.forEach((p) => { $('.pl-over', p.el).hidden = true; });
       d.started = true; d.t0 = performance.now();
+      if (d.mode === 'tug') d.tick = setInterval(tugTick, 250);
       d.p.forEach(duelNext);
     }
   };
   step();
 }
-function drawDuelHUD(p) {
-  $('.pl-score', p.el).textContent = `${p.score}/${D.target}`;
-  $('.track .fill', p.el).style.transform = `scaleX(${Math.min(1, p.score / D.target)})`;
+// both halves show both players: your runner and a ghost of theirs, or the rope from your side
+function drawDuel() {
+  for (const p of D.p) {
+    const o = D.p[1 - p.i];
+    if (D.mode === 'race') {
+      const mine = p.score + p.bonus, theirs = o.score + o.bonus;
+      $('.pl-score', p.el).textContent = `${Math.min(mine, D.target)}/${D.target}`;
+      const pos = (n) => `calc(${Math.min(1, n / D.target).toFixed(3)} * (100% - 36px) + 3px)`;
+      $('.tok.me', p.el).style.left = pos(mine);
+      $('.tok.opp', p.el).style.left = pos(theirs);
+    } else {
+      const v = p.i === 0 ? D.rope : -D.rope;
+      $('.knot', p.el).style.left = (50 - Math.max(-1, Math.min(1, v / TUG_WIN)) * 36) + '%';
+      $('.pl-score', p.el).textContent = mmss(Math.max(0, TUG_MS - (D.started ? duelNow() : 0)));
+    }
+  }
+}
+function tugTick() {
+  if (!D || D.over || !D.started) return;
+  drawDuel();
+  if (!D.paused && duelNow() >= TUG_MS) endDuel(D.rope > 0 ? D.p[0] : D.rope < 0 ? D.p[1] : null, false, D.rope === 0);
 }
 function drawDuelAns(p) {
   const a = $('.ans', p.el);
@@ -1802,8 +1910,30 @@ function duelNext(p) {
   drawDuelAns(p);
   restart(q, 'pop');
 }
+function pullPop(p, text, good) {
+  const el = $('.pl-pop', p.el);
+  el.textContent = text;
+  el.classList.toggle('bad', !good);
+  restart(el, 'go');
+}
+function freeze(p) {
+  const d = D;
+  p.frozenUntil = duelNow() + FREEZE_MS;
+  const fz = $('.freeze', p.el);
+  fz.hidden = false;
+  const check = () => {
+    if (D !== d || d.over) { fz.hidden = true; return; }
+    if (duelNow() >= p.frozenUntil) fz.hidden = true; else setTimeout(check, 100);
+  };
+  setTimeout(check, 100);
+}
+function duelWinner() {
+  if (D.mode === 'race') { for (const p of D.p) if (p.score + p.bonus >= D.target) return p; return null; }
+  return D.rope >= TUG_WIN ? D.p[0] : D.rope <= -TUG_WIN ? D.p[1] : null;
+}
 function duelPress(p, k) {
   if (!D || !D.started || D.paused || D.over || !p.q) return;
+  if (duelNow() < p.frozenUntil) return;
   if (k === 'back') { p.typed = p.typed.slice(0, -1); drawDuelAns(p); return; }
   if (k === 'clear') { p.typed = ''; drawDuelAns(p); return; }
   if (k === '0' && !p.typed) return;
@@ -1817,13 +1947,15 @@ function duelPress(p, k) {
     else { sfx.bad(); p.typed = ''; restart($('.ans', p.el), 'bad'); }
     return;
   }
-  const ok = given === ans;
-  p.attempts.push({ kind: p.q.kind, table: p.q.t, times: p.q.m, answer: given, correct: ok, ms: Math.round(duelNow() - p.qStart), timedOut: false, again: p.q.again });
+  const ms = Math.round(duelNow() - p.qStart), ok = given === ans, sign = p.i === 0 ? 1 : -1;
+  p.attempts.push({ kind: p.q.kind, table: p.q.t, times: p.q.m, answer: given, correct: ok, ms, timedOut: false, again: p.q.again });
   if (ok) {
     p.score++;
     sfx.good(); restart(p.el, 'hit');
-    drawDuelHUD(p);
-    if (p.score >= D.target) { endDuel(p, false); return; }
+    if (D.mode === 'tug') { const pull = pullFor(p.q, ms); D.rope += sign * pull; pullPop(p, `+${pull} ${pull === 3 ? 'Super pull!' : pull === 2 ? 'Pull!' : ''}`.trim(), true); }
+    drawDuel();
+    const w = duelWinner();
+    if (w) { endDuel(w, false, false); return; }
     duelNext(p);
   } else {
     p.wrong++;
@@ -1835,6 +1967,13 @@ function duelPress(p, k) {
     $('.g-tag', p.el).hidden = true;
     $('.pl-q', p.el).classList.add('fixing');
     drawDuelAns(p);
+    if (D.mode === 'tug') {
+      D.rope -= sign * 2; pullPop(p, '−2 Slipped!', false);
+      drawDuel();
+      const w = duelWinner();
+      if (w) { endDuel(w, false, false); return; }
+    }
+    freeze(p);
   }
 }
 function pauseDuel() {
@@ -1847,38 +1986,47 @@ function resumeDuel() {
   D.pausedMs += performance.now() - D.pauseAt; D.paused = false;
   $('#duel-over').hidden = true;
 }
-function endDuel(winner, quit) {
+function endDuel(winner, quit, draw) {
   if (!D || D.over) return;
   const d = D;
   const playedMs = d.started ? duelNow() : 0;
   d.over = true;
+  clearInterval(d.tick);
   releaseWake();
   const s = d.p[0], o = d.p[1];
   const doc = {
     v: 2, id: d.id, player: 'Sia', startedAt: d.startedAt, endedAt: new Date().toISOString(),
-    game: 'faceoff', mode: 'general', kinds: d.kinds, tables: s.tables, upTo: d.upTo,
+    game: 'faceoff', fmode: d.mode, mode: 'general', kinds: d.kinds, tables: s.tables, upTo: d.upTo,
     perQSec: null, sprintSec: null, score: s.score, wrong: s.wrong, timeouts: 0, bestStreak: 0,
     quit: !!quit, playedSec: Math.round(playedMs / 100) / 10,
-    target: d.target, opponent: o.name, opponentTables: o.tables, opponentScore: o.score, won: winner === s,
+    target: d.mode === 'race' ? d.target : null, rope: d.mode === 'tug' ? d.rope : null,
+    headStart: d.headStart == null ? null : d.p[d.headStart].name,
+    opponent: o.name, opponentTables: o.tables, opponentScore: o.score,
+    won: !draw && winner === s, draw: !!draw,
     attempts: s.attempts
   };
   if (doc.attempts.length) saveGame(doc);
   $('#duel-over').hidden = true;
+  d.p.forEach((p) => { $('.freeze', p.el).hidden = true; });
   if (quit) { closeDuel(); show('faceoff'); return; }
+  const timeUp = d.mode === 'tug' && playedMs >= TUG_MS;
   for (const p of d.p) {
     const other = d.p[1 - p.i];
     $('.pl-over', p.el).hidden = false;
     const m = $('.pl-msg', p.el);
-    m.textContent = p === winner ? 'You win!' : 'So close!';
+    m.textContent = draw ? "It's a tie!" : p === winner ? 'You win!' : 'So close!';
     restart(m, 'pop');
-    $('.pl-sub', p.el).textContent = `${p.score} – ${other.score}`;
+    $('.pl-sub', p.el).textContent = d.mode === 'race'
+      ? `${p.score + p.bonus} – ${other.score + other.bonus}`
+      : (timeUp ? "Time's up! " : p === winner ? 'Pulled all the way! ' : '') + `${p.score} right answer${p.score === 1 ? '' : 's'}`;
   }
   $('#duel-pause').hidden = true;
   $('#duel-end').hidden = false;
   sfx.end();
-  confetti();
+  if (!draw) confetti();
 }
 function closeDuel() {
+  if (D) clearInterval(D.tick);
   $('#v-duel').hidden = true;
   document.body.classList.remove('in-game');
   D = null;
@@ -1894,7 +2042,7 @@ for (const [i, sel] of [[0, '#pl1'], [1, '#pl2']]) {
 }
 $('#duel-pause').addEventListener('click', pauseDuel);
 $('#duel-resume').addEventListener('click', resumeDuel);
-$('#duel-quit').addEventListener('click', () => endDuel(null, true));
+$('#duel-quit').addEventListener('click', () => endDuel(null, true, false));
 $('#duel-rematch').addEventListener('click', () => { closeDuel(); startDuel(); });
 $('#duel-done').addEventListener('click', () => { closeDuel(); show('faceoff'); });
 
@@ -1975,7 +2123,7 @@ function renderCharts() {
   const stars = days.map(([D, d]) => ({ x: D, y: d.mastered }));
   lineChart($('#chart-stars'), stars, {
     max: Math.max(5, ...stars.map((p) => p.y)), stepped: true, tick: (t) => String(t), val: (y) => y + ' ★',
-    aria: 'Facts mastered over time', empty: 'Stars show up after she gets a fact right and fast on 3 separate days.'
+    aria: 'Facts mastered over time', empty: 'Stars show up after she gets a fact right and fast on 3 separate days, or 10 times fast in one day.'
   });
 }
 function renderHeat() {
@@ -1994,7 +2142,7 @@ function renderHeat() {
   } else {
     let m = 0, total = 0;
     for (const t of rows) for (let x = 1; x <= cols; x++) { total++; const s = stats.get(keyOf(pKind, t, x)); if (s && s.level >= 3) m++; }
-    $('#heat-note').textContent = `★ ${m} of the ${total} facts in this grid are mastered. A star needs a right, fast answer on 3 separate days, spaced out. Tap a square to see when it's next due.` + kindNote;
+    $('#heat-note').textContent = `★ ${m} of the ${total} facts in this grid are mastered. A star needs a right, fast answer on 3 separate days, spaced out, or 10 fast right answers in one day. Tap a square to see when it's next due.` + kindNote;
     $('#legend').innerHTML = '<span class="sw"><i class="e"></i>not tried yet</span><span class="sw"><i style="background:var(--card-2);border:2px solid var(--line)"></i>practising</span>'
       + '<span class="sw"><i style="background:var(--s1);color:var(--si1)">●</i>1 good day</span><span class="sw"><i style="background:var(--s2);color:var(--si2)">●●</i>2 good days</span><span class="sw"><i style="background:var(--s3);color:var(--si3)">★</i>mastered</span>';
   }
@@ -2034,10 +2182,11 @@ function renderDetail(T = todayIdx()) {
   const sm = summarize(s);
   const lvl = ['Still practising.', '● Right and fast on 1 day.', '●● Right and fast on 2 separate days.', '★ Mastered.'][s.level];
   const due = s.due == null ? '' : s.due <= T ? ' Due for practice today.' : ` Next check: ${fmtDay(s.due)}.`;
+  const today = s.level < 3 && s.lastDay === T && s.dayFast ? ` Today: ${s.dayFast} of ${SAME_DAY_STAR} fast answers toward a star.` : '';
   const chips = s.recent.map((r) => r.ok ? `<span>${(r.ms / 1000).toFixed(1)} s</span>` : `<span class="x">${r.to ? 'out of time' : 'wrong'}</span>`).join('');
   box.innerHTML = `<b class="big">${fullText(f)}</b>`
     + (sm.avg == null ? 'Not right yet in her last tries.' : `Average ${fmtS(sm.avg)} on her last ${s.recent.length === 1 ? 'try' : s.recent.length + ' tries'}.`)
-    + ` Tried ${s.n} time${s.n === 1 ? '' : 's'} in all, ${s.wrong} wrong. ${lvl}${due}`
+    + ` Tried ${s.n} time${s.n === 1 ? '' : 's'} in all, ${s.wrong} wrong. ${lvl}${due}${today}`
     + `<div class="recent" aria-label="Last tries, oldest first">${chips}</div>`;
 }
 function renderSlow() {
@@ -2061,7 +2210,10 @@ function renderGames(games) {
     if (g.game === 'speed') { name = `Speed Test (${g.perQSec} s)`; icon = ICONS.bolt; }
     else if (g.game === 'sprint') { name = '100-Second Sprint'; icon = ICONS.watch; }
     else if (g.game === 'practice') { name = "Today's practice"; icon = ICONS.star; }
-    else { name = `Face-off vs ${esc(g.opponent || 'Player 2')}`; icon = ICONS.vs; tag = `<span class="tag">${g.quit ? 'ended early' : (g.won ? 'won ' : 'lost ') + g.score + '–' + g.opponentScore}</span>`; }
+    else {
+      name = `${g.fmode === 'tug' ? 'Tug of war' : 'Race'} vs ${esc(g.opponent || 'Player 2')}`; icon = ICONS.vs;
+      tag = `<span class="tag">${g.quit ? 'ended early' : g.draw ? 'tie' : (g.won ? 'won' : 'lost') + (g.fmode === 'tug' ? '' : ' ' + g.score + '–' + g.opponentScore)}</span>`;
+    }
     if (g.game === 'speed' || g.game === 'sprint') tag = `<span class="tag">${g.mode === 'adaptive' ? 'Adaptive' : 'General'}</span>`;
     if (ks.length > 1 || ks[0] !== 'mul') tag += `<span class="tag">${ks.map((k) => KIND_SIGN[k]).join(' ')}</span>`;
     if (g.quit && g.game !== 'faceoff') sub += ' · ended early';
